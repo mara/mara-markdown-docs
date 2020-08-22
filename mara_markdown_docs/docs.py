@@ -3,6 +3,11 @@ import pathlib
 import dataclasses
 
 from mara_page import navigation, response, _, bootstrap, acl
+from markdown_it import MarkdownIt
+from markdown_it.extensions.front_matter import front_matter_plugin
+from markdown_it.extensions.footnote import footnote_plugin
+from markdown_it.extensions.deflist import deflist_plugin
+from .mermaid_md_plugin import mermaid_plugin
 
 from .config import documentation
 
@@ -32,7 +37,6 @@ class Doc:
         if '/' in self.full_doc_id and '/' in self.full_name:
             folder_name, _ = self.full_name.split('/', maxsplit=1)
         return folder_name
-
 
     @property
     def ids(self):
@@ -81,6 +85,7 @@ def documentation_navigation_entry():
         uri_fn=lambda: flask.url_for('docs.start_page'),
         children=children)
 
+
 @docs.route('')
 @docs.route('/')
 @acl.require_permission(documentation_acl_resource)
@@ -93,7 +98,6 @@ def start_page():
     return response.Response(title='Docs', html=[
         bootstrap.card(header_left='Table of Content', body=[_.ul[links]])
     ])
-
 
 
 @docs.route('/<doc_id>')
@@ -112,65 +116,53 @@ def document(doc_id, folder_id=""):
         raise flask.abort(404, f"Documentation {doc_id} is not found ({doc.path}).")
     with doc.path.open() as f:
         md_content = f.read()
-        md_escaped = flask.escape(md_content)
-        return response.Response(title=f'Doc "{doc.full_name}"',
-                                 html=[bootstrap.card(
-                                     body=[
-                                         _.div(style="display:none")[_.pre(id_='markdown-source')[md_escaped]],
-                                         _.div(id_='markdown-rendered-content')[
-                                             _.span(class_='fa fa-spinner fa-spin')[' ']
-                                         ],
-                                     ]),
-                                     _.script(type="text/javascript")[__render_code],
-                                 ],
-                                 js_files=[
-                                     'https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.4.4/mermaid.min.js',
-                                     'https://cdnjs.cloudflare.com/ajax/libs/markdown-it/10.0.0/markdown-it.min.js',
-                                     'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js',
-                                     flask.url_for('docs.static', filename='markdown-it-naive-mermaid.js'),
-                                 ],
-                                 css_files=[
-                                     'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css',
-                                 ]
-                                 )
 
+        # style tables with bootstrap
+        def render_table_open(self, tokens, idx, options, env):
+            return '<table class="table">'
 
-# table render trick from https://github.com/markdown-it/markdown-it/issues/117#issuecomment-109386469
+        md = (
+            MarkdownIt()
+                .use(front_matter_plugin)
+                .use(footnote_plugin)
+                .use(deflist_plugin)
+                .use(mermaid_plugin)
+                .enable('table')
+        )
+        md.add_render_rule("table_open", render_table_open)
+
+        html_text = md.render(md_content)
+
+        return response.Response(
+            title=f'Doc "{doc.full_name}"',
+            html=[bootstrap.card(
+                body=[
+                    _.div(id_='markdown-rendered-content')[html_text],
+                ]),
+                _.script(type="text/javascript")[__mermaid_render_code],
+            ],
+            js_files=[
+                'https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.7.0/mermaid.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js',
+            ],
+            css_files=[
+                'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css',
+            ]
+        )
+
 
 # language=JavaScript
-__render_code = """
+__mermaid_render_code = """
 window.addEventListener('load', function(event) {
-var md = window.markdownit({
-  html: true,
-  linkify: true,
-  typographer: true,
-  highlight: function (str, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(lang, str).value;
-      } catch (__) {}
-    }
-
-    return ''; // use external default escaping
-  }
-}).use(NaiveMermaidPlugIn, {});
-// style tables with bootstrap
-md.renderer.rules.table_open = function(tokens, idx) {
-      return '<table class="table">';
-};
-
-var md_text = document.getElementById("markdown-source").innerText;
-var md_div = document.getElementById("markdown-rendered-content");
-md_div.innerHTML = md.render(md_text);
-// using a Mermaid.render(...) in the plugin always resulted in truncated labels for boxes, but doing it after the
-// MD is rendered works
 mermaid.initialize({
   // allow html tags in text
   securityLevel: 'loose',
   flowchart:{
+            // don't go over the surrounding container
+            useMaxWidth:true,
+            // allow html in labels
             htmlLabels:true
         }
   });
 });
 """
-#
