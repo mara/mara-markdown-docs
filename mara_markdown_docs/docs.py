@@ -33,7 +33,6 @@ class Doc:
             folder_name, _ = self.full_name.split('/', maxsplit=1)
         return folder_name
 
-
     @property
     def ids(self):
         """The folder_id, doc_id of this doc"""
@@ -81,6 +80,7 @@ def documentation_navigation_entry():
         uri_fn=lambda: flask.url_for('docs.start_page'),
         children=children)
 
+
 @docs.route('')
 @docs.route('/')
 @acl.require_permission(documentation_acl_resource)
@@ -93,7 +93,6 @@ def start_page():
     return response.Response(title='Docs', html=[
         bootstrap.card(header_left='Table of Content', body=[_.ul[links]])
     ])
-
 
 
 @docs.route('/<doc_id>')
@@ -113,26 +112,27 @@ def document(doc_id, folder_id=""):
     with doc.path.open() as f:
         md_content = f.read()
         md_escaped = flask.escape(md_content)
-        return response.Response(title=f'Doc "{doc.full_name}"',
-                                 html=[bootstrap.card(
-                                     body=[
-                                         _.div(style="display:none")[_.pre(id_='markdown-source')[md_escaped]],
-                                         _.div(id_='markdown-rendered-content')[
-                                             _.span(class_='fa fa-spinner fa-spin')[' ']
-                                         ],
-                                     ]),
-                                     _.script(type="text/javascript")[__render_code],
-                                 ],
-                                 js_files=[
-                                     'https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.4.4/mermaid.min.js',
-                                     'https://cdnjs.cloudflare.com/ajax/libs/markdown-it/10.0.0/markdown-it.min.js',
-                                     'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js',
-                                     flask.url_for('docs.static', filename='markdown-it-naive-mermaid.js'),
-                                 ],
-                                 css_files=[
-                                     'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css',
-                                 ]
-                                 )
+        return response.Response(
+            title=f'Doc "{doc.full_name}"',
+            html=[bootstrap.card(
+                body=[
+                    _.div(style="display:none")[_.pre(id_='markdown-source')[md_escaped]],
+                    _.div(id_='markdown-rendered-content')[
+                        _.span(class_='fa fa-spinner fa-spin')[' ']
+                    ],
+                ]),
+                _.script(type="text/javascript")[__render_code],
+            ],
+            js_files=[
+                'https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.7.0/mermaid.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/markdown-it/11.0.0/markdown-it.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js',
+                flask.url_for('docs.static', filename='markdown-it-naive-mermaid.js'),
+            ],
+            css_files=[
+                'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/styles/default.min.css',
+            ]
+        )
 
 
 # table render trick from https://github.com/markdown-it/markdown-it/issues/117#issuecomment-109386469
@@ -168,6 +168,9 @@ mermaid.initialize({
   // allow html tags in text
   securityLevel: 'loose',
   flowchart:{
+            // don't go over the surrounding container
+            useMaxWidth:true,
+            // allow html in labels
             htmlLabels:true
         }
   });
