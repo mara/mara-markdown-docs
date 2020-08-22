@@ -63,11 +63,13 @@ def test_404_directory(client):
     r = client.get('/docs/developer')
     print(r.data)
     assert b'404' in r.data, 'Missing page is not missing'
+    assert r.status_code == 404, 'Missing page is not missing: status'
 
 def test_404_page(client):
     r = client.get('/docs/developer/missing')
     print(r.data)
     assert b'404' in r.data, 'Missing page is not missing'
+    assert r.status_code == 404, 'Missing page is not missing: status'
 
 
 @pytest.fixture
