@@ -1,10 +1,17 @@
 import mara_markdown_docs.config
 import mara_app.app
+import mara_page.acl
 import pathlib
 from mara_app.monkey_patch import patch
 
 
 import pytest
+
+
+# Workaround for https://github.com/mara/mara-page/pull/6
+@patch(mara_page.acl.current_user_has_permissions)
+def fixed_current_user_has_permissions(resources):
+    return list(map(lambda resource: [resource, True], resources))
 
 repo_root_dir = pathlib.Path(__file__).parent.parent
 repo_readme = repo_root_dir / 'README.md'
