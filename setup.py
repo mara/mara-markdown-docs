@@ -10,7 +10,7 @@ def get_long_description():
 
 setup(
     name='mara-markdown-docs',
-    version='0.1.0',
+    version='0.9.0',
 
     description='Display markdown documentation in mara UI',
 
