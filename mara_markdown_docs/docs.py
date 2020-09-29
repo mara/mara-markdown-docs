@@ -69,7 +69,7 @@ def documentation_navigation_entry():
                 folders[folder_id] = folder
             where_to_append = folder
         child = navigation.NavigationEntry(
-            label=doc.doc_name, icon='file', description=f'Documentation for "{doc.full_name}"',
+            label=doc.doc_name, icon='file', description=f'Documentation for {doc.full_name}',
             uri_fn=lambda _doc_id=doc_id, _folder_id=folder_id: flask.url_for('docs.document',
                                                                               doc_id=_doc_id,
                                                                               folder_id=_folder_id))
@@ -95,8 +95,49 @@ def start_page():
     ])
 
 
-@docs.route('/<doc_id>')
-@docs.route('/<folder_id>/<doc_id>')
+@docs.route('/<doc_id>/<file_name>')
+@docs.route('/<folder_id>/<doc_id>/<file_name>')
+@acl.require_permission(documentation_acl_resource)
+def image(doc_id, folder_id="", file_name=""):
+    allowed_file_extensions = [
+        '.txt',  # e.g. example conf files
+        '.png', '.gif', '.jpg', '.jpeg', # images
+    ]
+
+
+    docs = all_docs()
+    if folder_id:
+        full_doc_id = folder_id + '/' + doc_id
+    else:
+        full_doc_id = doc_id
+    if full_doc_id not in docs:
+        raise flask.abort(404, f"Documentation {doc_id} is not known.")
+    doc = docs[full_doc_id]
+    if not doc.path.exists():
+        raise flask.abort(404, f"Documentation {doc_id} is not found ({doc.path}).")
+
+    # make sure we only send out data which is ok...
+
+    # only certain file types
+    file = doc.path.parent / file_name
+    if file.suffix not in allowed_file_extensions:
+        raise flask.abort(405, f"Filetype of {doc_id} / {file_name} is not allowed")
+
+    # flask itself prevents subfolders as the defined routes above do not allow
+    # for multiple segments in the filename path
+    # # prevent files from subfolders and therefore also '..'
+    # if '/' in file_name:
+    #     raise flask.abort(405, f"Only filenames allowed.")
+
+    # error on non-existing files
+    if not file.exists():
+        raise flask.abort(404, f"File {doc_id} / {file_name} is not found ({file}).")
+
+    return flask.send_file(filename_or_fp=file)
+
+
+@docs.route('/<doc_id>/')
+@docs.route('/<folder_id>/<doc_id>/')
 @acl.require_permission(documentation_acl_resource)
 def document(doc_id, folder_id=""):
     docs = all_docs()
