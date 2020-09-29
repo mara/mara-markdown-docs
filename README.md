@@ -18,6 +18,12 @@ This package displays configured documentation in markdown format in the UI:
 
 &nbsp;
 
+## Screenshot
+
+![Screenshot](mara-markdown-docs_800px.png) 
+
+&nbsp;
+
 ## Installation
 
 To use the library directly, use pip:
