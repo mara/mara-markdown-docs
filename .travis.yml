@@ -1,10 +1,21 @@
 language: python
-dist: xenial
 matrix:
   include:
     - python: '3.7'
-      env: UPLOAD=True
     - python: '3.8'
+      env: UPLOAD=True
+    - python: '3.9'
 install:
   - pip install .[test]
 script: pytest
+deploy:
+  provider: pypi
+  distributions: sdist
+  user: mara-pypi-upload-account
+  password:
+    secure: BftoQs3Q2tF4hDb8GMCnMYfC0Fd5YQ2K0koTPhFL/kKMi8tQ1V8FwlGwED42uxLuv2inSPgRASsNWzHTIY2ivOnkKHsrxudUKW9omECKi7LuuY1S0rgBe6mT4Yt1Me8vxJg4wXqzASqDkHS6MbJwYXKpzV+6B6ehA69x3OBT+KcTYRu49ajJ9xQYinQaEcTkTOUXwhHr9D6Zl6a7iKInlD8mB8/dsblF81s18d4OSGnj8Nft0AJf3Rekr/LyvMBFGeXJ0QGDBWQRKSUGYmpB8DM4h8hCUazt/sGAhvfoCJURq/Xt1POOILyOQp4R+LtIvWD4zjfHO98oUhVk5KqBIATfhEMbZY2QsEmaVQ6zU23bs7cA6e2u7Wf5CoPqsZNo0eWD0pSYRdJWMcvkXSTTbwjJ0alhfLqDa1iV/CyNg1v8RXjvj/A89+xRIi8ByymGi7fDyk4p/gemxP+lrAqVr5DBI9K/aNmpwVEDmEq99qdGGLdlrXQwNKkuPCxqrcig9KQwLHIWPLbi/ZHRH4TmvfNVOEccQTWSvkI5HvISUPlFxxtacZfd+pK2yt2+giWNvJTh4GVIAT1QD2pX2ISe4mVnO4vewRcedSuBd21TMubCMqGng+umTQ5vaDy8N86hbCDpXFb1ZT69TTDN+kwga2RuW6DEVPxWGNDhIzNrwhk=
+  on:
+    tags: true
+    branch: master
+    repo: mara/mara-markdown-docs
+    condition: "$UPLOAD == True"

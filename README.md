@@ -23,14 +23,17 @@ This package displays configured documentation in markdown format in the UI:
 To use the library directly, use pip:
 
 ```
-pip install git+https://github.com/jankatins/mara-markdown-docs.git
+python3 -m pip install mara-markdown-docs
+
+# or directly from git
+python3 -m pip install git+https://github.com/mara/mara-markdown-docs.git
 ```
 
 &nbsp;
 
 ## Configuration
 
-Assuming you configure via `app/setup_docs.py`:
+Assuming you configure via `app/local_setup.py`:
 
 ```python
 """Configures the docs functionality"""
