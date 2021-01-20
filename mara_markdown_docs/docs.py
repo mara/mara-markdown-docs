@@ -4,7 +4,7 @@ import dataclasses
 
 from mara_page import navigation, response, _, bootstrap, acl
 
-from .config import documentation
+from . import config
 
 docs = flask.Blueprint('docs', __name__, url_prefix='/docs', static_folder='static')
 
@@ -45,7 +45,7 @@ class Doc:
 
 def all_docs():
     all_docs = {}
-    for full_name, path in documentation().items():
+    for full_name, path in config.documentation().items():
         if full_name.count('/') > 1:
             raise ValueError(f"Only one folder level allowed: {full_name}")
         full_doc_id = f"{full_name.lower().replace(' ', '_')}"
