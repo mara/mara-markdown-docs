@@ -143,4 +143,3 @@ def test_unauth_docs(client_unauth):
     assert r.status_code == 403, 'Forbidden page is not forbidden'
     r = client_unauth.get('/mara-app/configuration')
     assert r.status_code == 200, 'config should still be allowed'
-

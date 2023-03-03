@@ -19,4 +19,3 @@ const NaiveMermaidPlugIn = (md, opts)=> {
     return defaultRenderer(tokens, idx, opts, env, self)
   }
 }
-

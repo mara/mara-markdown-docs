@@ -13,14 +13,14 @@ This package displays configured documentation in markdown format in the UI:
 - Convert markdown to html via [markdown-it](https://github.com/markdown-it/markdown-it)
 - Supports a folder structure (single level) in the menu
 - Supports [mermaid](https://mermaid-js.github.io/mermaid/#/) diagrams
-- Serves referenced images (`.png`, `.jpg`, `.gif`) in markdown and `.txt` files (for example config, etc) 
+- Serves referenced images (`.png`, `.jpg`, `.gif`) in markdown and `.txt` files (for example config, etc)
   if these are in the same folder as the markdown file
 
 &nbsp;
 
 ## Screenshot
 
-![Screenshot](mara-markdown-docs_800px.png) 
+![Screenshot](mara-markdown-docs_800px.png)
 
 &nbsp;
 

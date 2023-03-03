@@ -13,4 +13,3 @@ def MARA_CONFIG_MODULES():
 def MARA_ACL_RESOURCES():
     from . import docs
     return {'Documentation': docs.documentation_acl_resource}
-
